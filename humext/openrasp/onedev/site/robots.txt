@@ -1,0 +1,23 @@
+User-agent: *
+
+Disallow: /*?*
+Disallow: /*/files/
+Disallow: /*/blob/
+Disallow: /*/commits
+Disallow: /*/archive
+Disallow: /*/raw
+Disallow: /*/attachment
+Disallow: /*/compare
+Disallow: /*/stats
+Disallow: /*/branches
+Disallow: /*/tags
+Disallow: /*/children
+Disallow: /*/builds
+Disallow: /*/pulls
+Disallow: /*/issues/new
+Disallow: /*/code-comments
+Disallow: /*/boards
+Disallow: /*/changes
+Disallow: /projects/new
+Disallow: /downloads
+Disallow: /login

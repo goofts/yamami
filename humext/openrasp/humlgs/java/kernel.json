@@ -1,0 +1,13 @@
+{
+    "display_name": "Java",
+    "argv": [
+        "java",
+        "-ea",
+        "-Xmx256m",
+        "-jar",
+        "/humlgs/java/ijava.jar",
+        "{connection_file}"
+    ],
+    "language": "java",
+    "interrupt_mode": "message"
+}

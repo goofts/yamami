@@ -1,0 +1,26 @@
+FROM goofts/rasp:base
+
+MAINTAINER G00fts goofts@icloud.com
+
+COPY humlib /humlib
+COPY humlog /humlog
+COPY humsys /humsys
+
+COPY elasticsearch /usr/share/elasticsearch
+COPY kibana        /usr/share/kibana
+
+### start install services
+##start for elastic
+ENV CONFIG_NAME=$CONFIG_NAME" elastic kibana"
+
+RUN rm -rf /etc/supervisor/conf.d/*.ini
+
+RUN cp -rf /humsys/supervisord.d/elastic.ini /etc/supervisor/conf.d/elastic.ini && \
+    bash /humsys/provision --database elastic
+##--------------------------------------------------------------
+### --------------------------------------------------------------
+
+RUN echo "$CONFIG_NAME"|awk '{for(i=1;i<=NF;i++){print "'"$CONFIG"'"|"/bin/bash";}}' && \
+    rm -rf /humsys/supervisord.d /humsys/nginx.d /humlib.config.d /humlib/*.sh
+
+CMD ["/bin/bash", "-c", "/bin/bash /humsys/provision"]

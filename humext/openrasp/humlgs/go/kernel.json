@@ -1,0 +1,8 @@
+{
+    "display_name": "Go",
+    "argv": [
+        "/humlgs/go/gophernotes",
+        "{connection_file}"
+    ],
+    "language": "go"
+}

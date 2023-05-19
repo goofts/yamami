@@ -1,0 +1,35 @@
+FROM goofts/rasp:es
+
+MAINTAINER G00fts goofts@icloud.com
+
+COPY humlib /humlib
+COPY humlog /humlog
+COPY humsys /humsys
+COPY humlgs /humlgs
+
+COPY jenkins   /usr/share/jenkins
+COPY onedev    /usr/share/onedev
+COPY raspcloud /usr/share/raspcloud
+
+### start install services
+##start for openrasp
+ENV CONFIG_NAME=$CONFIG_NAME" mongodb mariadb jenkins onedev"
+ENV KERNEL='s#export LANGUAGES="inter86"#export LANGUAGES="java golang"#g'
+
+RUN sed -i "$KERNEL" /humsys/env
+
+RUN rm -rf /etc/supervisor/conf.d/*.ini
+
+RUN cp -rf /humsys/supervisord.d/mongodb.ini /etc/supervisor/conf.d/mongodb.ini && \
+    cp -rf /humsys/supervisord.d/mariadb.ini /etc/supervisor/conf.d/mariadb.ini && \
+    cp -rf /humsys/supervisord.d/jenkins.ini /etc/supervisor/conf.d/jenkins.ini && \
+    bash   /humsys/provision --database mongodb                                 && \
+    bash   /humsys/provision --database mysql                                   && \
+    bash   /humsys/provision --install  openrasp
+##--------------------------------------------------------------
+### --------------------------------------------------------------
+
+RUN echo "$CONFIG_NAME"|awk '{for(i=1;i<=NF;i++){print "'"$CONFIG"'"|"/bin/bash";}}' && \
+    rm -rf /humsys/supervisord.d /humsys/nginx.d /humlib/config.d /humlib/*.sh
+
+CMD ["/bin/bash", "-c", "/bin/bash /humsys/provision"]

@@ -1,0 +1,253 @@
+#!/bin/bash
+#
+# Yamami Main Provisioning Script.
+#
+# Usage: provision.sh [-h|--help] [parameters ...] [optional ...]
+#
+# We want the provision script loads all env configure first
+if [[ -f /humsys/env ]];then
+    . /humsys/env
+
+    rm    -rf /usr/local/share/jupyter/kernels /tmp/jupyterhub_cookie_secret;
+    chmod -R  a+rw $PID_PATH $LOG_PATH $RUN_PATH $TMP_PATH $SCRIPT_PATH/hub.d;
+fi
+#
+# We want the provision script to fail as soon as there are any errors
+set -e;
+
+location=$(pwd);
+filename=$(head -c 500 /dev/urandom|md5sum|cut -d" " -f1);
+repo="mirrors.aliyun.com";
+#openresty="https://github.com/openresty/openresty.git";
+openresty="https://gitee.com/mirrors/openresty.git";
+
+# Source library script for subprocesses
+if [[ -f /humlib/extra.sh ]];then
+    . /humlib/extra.sh;
+
+    if [[ ! -x "/usr/local/sbin/openresty" ]];then
+        if [[ -z $(check_user "pi") ]];then
+            install_user root pi;
+        fi
+
+        sed -i 's/ports.ubuntu.com/'"$repo"'/g'      /etc/apt/sources.list;
+        sed -i 's/archive.ubuntu.com/'"$repo"'/g'    /etc/apt/sources.list;
+        sed -i 's/security.ubuntu.com/'"$repo"'/g'   /etc/apt/sources.list;
+        # sed -i 's/archive.canonical.com/'"$repo"'/g' /etc/apt/sources.list;
+
+        update_package_repo&&install_apt_all_package "ca-certificates curl git"&&curl -sL https://deb.nodesource.com/setup_lts.x|bash -;
+        echo "git clone $openresty $location/openresty &>/dev/null "|"/bin/bash"&&cd $location/openresty;
+        update_package_repo&&install_apt_all_package "dos2unix zlib1g-dev libpcre3-dev libssl-dev python3-dev build-essential mercurial wget pkg-config";
+        (make &>$TMP_PATH/$filename&&info "make openresty project success.")||{ fail "make openresty project fail.";cat $TMP_PATH/$filename;results 1;};
+        lngs="--with-luajit --with-http_stub_status_module --with-http_realip_module --with-pcre --with-pcre-jit --with-file-aio --with-threads";
+        rm openresty*.tar.gz&&cd $location/openresty/openresty-*.*.*&&echo "./configure -j2 --prefix=/usr/local/openresty $lngs "|"/bin/bash";
+        (make -j2 &>$TMP_PATH/$filename&&info "make openresty success.")||{ fail "make openresty fail.";cat $TMP_PATH/$filename;results 1;};
+        (make install &>$TMP_PATH/$filename&&info "install openresty success.")||{ fail "install openresty fail.";cat $TMP_PATH/$filename;results 1;};
+        cd $location;
+
+        install_apt_package certbot;
+        install_apt_package goaccess;
+        install_apt_package less;
+        install_apt_package libpam-google-authenticator;
+        install_apt_package ncat;
+        install_apt_package net-tools;
+        install_apt_package nodejs;
+        install_apt_package openssl;
+        install_apt_package python3-certbot-nginx;
+        install_apt_package python3-pip;
+        install_apt_package python3-pycurl;
+        install_apt_package redis;
+        install_apt_package screen;
+        install_apt_package siege;
+        install_apt_package stunnel4;
+        install_apt_package sqlite3;
+        install_apt_package ssh;
+        install_apt_package sudo;
+        install_apt_package supervisor;
+        install_apt_package vim;
+
+        install_npm_package configurable-http-proxy;
+        install_npm_package terser;
+        install_npm_package svgo;
+
+        install_pip3_package aiohttp;
+        install_pip3_package asyncio;
+        install_pip3_package argparse;
+        install_pip3_package emu86;
+        install_pip3_package jupyter;
+        install_pip3_package jupyterhub;
+        install_pip3_package jupyterlab;
+        install_pip3_package nest_asyncio;
+        install_pip3_package mitmproxy;
+        install_pip3_package peewee;
+        install_pip3_package rich;
+
+        gcc -g /humsys/supervisord.d/elastic.c -o /usr/local/sbin/elastic;
+        gcc -g /humsys/supervisord.d/jenkins.c -o /usr/local/sbin/jenkins;
+        gcc -g /humsys/supervisord.d/kibana.c  -o /usr/local/sbin/kibana;
+        gcc -g /humsys/supervisord.d/mariadb.c -o /usr/local/sbin/mariadb;
+        gcc -g /humsys/supervisord.d/onedev.c  -o /usr/local/sbin/onedev;
+
+        update_package_repo&&purge_apt_all_package "build-essential mercurial";
+        rm -rf /usr/include/unix;ln -snf $LIB_PATH /usr/include/unix;
+        rm -rf /log /var/log&&ln -snf $LOG_PATH /log;ln -snf $LOG_PATH /var/log;
+        ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &>/dev/null;
+        dpkg-reconfigure -f noninteractive tzdata;
+
+        install_exec_file_or_dir nginx   /usr/local/openresty/nginx/sbin/ /usr/local/sbin/                     920 openresty;
+        install_exec_file_or_dir resty   /usr/local/openresty/bin/        /usr/local/sbin/                     920 resty;
+        install_exec_file_or_dir opm     /usr/local/openresty/bin/        /usr/local/sbin/                     920 opm;
+        install_exec_file_or_dir cmaps   /humsys/hub.d/                   /usr/local/share/jupyter/lab/static/ 920 cmaps;
+
+        configs $LIB_PATH/config.d/auth;
+        configs $LIB_PATH/config.d/bashrc;
+        configs $LIB_PATH/config.d/frps;
+        configs $LIB_PATH/config.d/gem;
+        configs $LIB_PATH/config.d/git;
+        configs $LIB_PATH/config.d/hub;
+        configs $LIB_PATH/config.d/nginx;
+        configs $LIB_PATH/config.d/npm;
+        configs $LIB_PATH/config.d/pip;
+        configs $LIB_PATH/config.d/redis;
+        configs $LIB_PATH/config.d/stunnel;
+        configs $LIB_PATH/config.d/su;
+        configs $LIB_PATH/config.d/supervisord;
+    fi
+
+    VALID_DB=("mongodb" "mysql" "elastic");
+    VALID_LANGUAGE=();
+    VALID_SERVER=("openrasp");
+
+    function usage(){
+        echo -e "\nYamami main provisioning script.\n";
+        echo -e "\nUsage: %s [[-h|--help]|[parameters ...] [[optional ...]|[install ...]]]\n" "${0}";
+        echo -e "\t-h,\t--help\tShows this help message and exit.\n";
+        echo -e "\nParameters:\n";
+        echo -e "\t-S,\t--store    STORE    \tSTORE for ext App. Default value is null\n";
+        echo -e "\t-K,\t--keyfile  PATH     \tPath to supplied SSL key file. Default value is privkey.pem.\n";
+        echo -e "\t-C,\t--certfile PATH     \tPath to supplied SSL certificate pem file. Default value is fullchain.pem.\n";
+        echo -e "\t-D,\t--domain   DOMAIN   \tDomain for Web App. Default value is goofts.com\n";
+        echo -e "\t-E,\t--email    EMAIL    \tEmail for Domain Owner. Default value is goofts@zl.com\n";
+        echo -e "\nInstall Parameters:\n";
+        echo -e "\t-i,\t--install  SERVER   \tInstall multiple server for installation.\n\t\tOnly support these:\n\t\t\t"${VALID_DB[@]}"\n";
+        echo -e "\t-l,\t--language LANGUAGE \tInstall multiple language for deployment.\n\t\tOnly support these:\n\t\t\t"${VALID_LANGUAGE[@]}"\n";
+        echo -e "\t-d,\t--database DB       \tInstall multiple database for deployment.\n\t\tOnly support these:\n\t\t\t"${VALID_SERVER[@]}"\n";
+    }
+
+    ARGS=$(getopt -o hSK:C:D:E:i:l:d: -l "help,store,keyfile:,certfile:,domain:,email:,install:,language:,database:" -n "$0" -- "$@");
+    eval set -- "$ARGS";
+
+    while true; do
+        case "$1" in
+            -h|--help)
+                usage;
+                results 0;
+                ;;
+            -S|--store)
+                STORE="network";
+                shift 1;
+                ;;
+            -K|--keyfile)
+                KEYFILE=$2;
+                shift 2;
+                ;;
+            -C|--certfile)
+                CERTFILE=$2;
+                shift 2;
+                ;;
+            -D|--domain)
+                DOMAIN=$2;
+                shift 2;
+                ;;
+            -E|--email)
+                EMAIL=$2;
+                shift 2;
+                ;;
+            -i|--install)
+                GIVEN_ARG=$2;
+                if [[ "${VALID_SERVER[@]}" =~ "${GIVEN_ARG}" ]];then
+                    SERVER=$2;
+                    INSTALLATION=true;
+                    shift 2;
+                else
+                    usage;
+                    results 1;
+                fi
+                ;;
+            -l|--language)
+                GIVEN_ARG=$2;
+                if [[ "${VALID_LANGUAGE[@]}" =~ "${GIVEN_ARG}" ]];then
+                    LANGUAGE=$2;
+                    INSTALLATION=true;
+                    shift 2;
+                else
+                    usage;
+                    results 1;
+                fi
+                ;;
+            -d|--database)
+                GIVEN_ARG=$2;
+                if [[ "${VALID_DB[@]}" =~ "${GIVEN_ARG}" ]];then
+                    DATABASE=$2;
+                    INSTALLATION=true;
+                    shift 2;
+                else
+                    usage;
+                    results 1;
+                fi
+                ;;
+            --)
+                shift;
+                break;
+                ;;
+            *)
+                usage;
+                results 1;
+                ;;
+        esac
+    done
+
+    info "Check for available memory, should be over 2GB";
+    AVAILABLE_RAM=`free -mt|grep Total|awk '{print $2}'`;
+    [[ ! -z $AVAILABLE_RAM ]]||AVAILABLE_RAM=1000;
+    [[ ! -z $STORE ]]||STORE="local";
+    [[ ! -z $KEYFILE ]]||KEYFILE="/humsys/hub.d/privkey.pem";
+    [[ ! -z $CERTFILE ]]||CERTFILE="/humsys/hub.d/fullchain.pem";
+    [[ ! -z $DOMAIN ]]||DOMAIN="*.goofts.com";
+    [[ ! -z $EMAIL ]]||EMAIL="goofts@zl.com";
+
+    if [[ $AVAILABLE_RAM -lt 2000 ]];then
+        fail "Yamami is likely to fail to install without 1GB or more of RAM.";
+        results 1;
+    fi
+
+    if [[ $INSTALLATION ]];then
+        if [[ $DATABASE ]];then
+            case "$DATABASE" in
+                "mongodb") install_mongo ;;
+                "mysql")   install_mysql ;;
+                "elastic") install_elastic ;;
+                *)         usage;results 1 ;;
+            esac
+        fi
+
+        if [[ $SERVER ]];then
+            case "$SERVER" in
+                "openrasp") install_rasp $STORE ;;
+                *)          usage;results 1 ;;
+            esac
+        fi
+    fi
+else
+    mkdir -p /usr/local/share/jupyter/kernels&&chown -R www-data:www-data /humlog/nginx;
+
+    [[ ! -f /etc/passwd ]]||cat /etc/passwd|\
+    awk -F ':' '{if(!NF){next};cmd="echo "$1":$(head -c 500 /dev/urandom|md5sum|cut -d\" \" -f1)|chpasswd";print cmd|"/bin/bash";}';
+    [[ "inter86" == $LANGUAGES ]]||echo $LANGUAGES|\
+    awk -F ' ' '{for(i=1;i<=NF;i++){cmd="if [[ -d \"/humlgs/"$i"\" ]];then jupyter kernelspec install /humlgs/"$i";fi;";print cmd|"/bin/bash";}}';
+
+    [[ -z $(supervisorctl -c /etc/supervisor/supervisord.conf status|grep -E "^(unix|error)") ]]||supervisord -c /etc/supervisor/supervisord.conf;
+    supervisorctl -c /etc/supervisor/supervisord.conf restart all&&/usr/local/sbin/openresty &>/dev/null;
+fi
+
+results 0;

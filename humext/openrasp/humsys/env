@@ -1,0 +1,37 @@
+export YAMAMI_VERSION=1.1.1
+
+export CLICOLOR=1
+export ES_HEAP_SIZE=1g
+export LANGUAGES="inter86"
+export DEBIAN_FRONTEND=noninteractive
+export LSCOLORS=gxfxaxdxcxegedabagacad
+
+export GO111MODULE=on
+export GOPATH=/go
+export GOPROXY=https://goproxy.cn,direct
+
+export JULIA_DEPOT_PATH=/usr/share/julia
+export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+
+export PYTHON_PACKAGES=/usr/local/lib/default-python/dist-packages
+
+export SUPERVISOR_CONF=/etc/supervisor/supervisord.conf
+export NGX_CONF=/usr/local/openresty/nginx/conf/nginx.conf
+
+export PID_PATH=/run
+export RUN_PATH=/run
+export TMP_PATH=/tmp
+export LIB_PATH=/humlib
+export LOG_PATH=/humlog
+export SCRIPT_PATH=/humsys
+export KERNEL_PATH=/humlgs
+
+export CLING_HOME=/cling
+export KOTLIN_HOME=/kotlin
+export HUB_HOME=/humsys/hub.d
+export NGX_HOME=/humsys/nginx.d
+export JAVA_HOME=/usr/lib/jvm/default-java
+export SUPERVISOR_HOME=/etc/supervisor/conf.d
+export COMPOSER_HOME=/usr/lib/composer
+
+export PATH=$PATH:$CLING_HOME/bin:$KOTLIN_HOME/bin:$JAVA_HOME/bin:$GOPATH/bin:$POSTGRES_HOME/bin:$COMPOSER_HOME/vendor/bin
