@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 -- local sub = string.sub
 local req_socket = ngx.req.socket
 local match = string.match

@@ -1,9 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
---
--- This library is an enhanced Lua port of the standard ngx_limit_conn
--- module.
-
-
 local math = require "math"
 
 

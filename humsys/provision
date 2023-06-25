@@ -35,9 +35,13 @@ if [[ -f /humlib/extra.sh ]];then
         sed -i 's/security.ubuntu.com/'"$repo"'/g'   /etc/apt/sources.list;
         # sed -i 's/archive.canonical.com/'"$repo"'/g' /etc/apt/sources.list;
 
-        update_package_repo&&install_apt_all_package "ca-certificates curl git"&&curl -sL https://deb.nodesource.com/setup_lts.x|bash -;
+        update_package_repo&&install_apt_all_package "ca-certificates curl dos2unix git mercurial pkg-config wget";
+        (curl -sL https://deb.nodesource.com/setup_lts.x|bash - &>$TMP_PATH/$filename&&info "add nodejs source-list success.")||{ fail "add nodejs source-list fail.";cat $TMP_PATH/$filename;results 1;};
+
+        update_package_repo&&install_apt_all_package "build-essential python3-dev python3-pip python3-pycurl";
+        update_package_repo&&install_apt_all_package "libpam-google-authenticator libpcre3-dev libssl-dev";
+
         echo "git clone $openresty $location/openresty &>/dev/null "|"/bin/bash"&&cd $location/openresty;
-        update_package_repo&&install_apt_all_package "dos2unix zlib1g-dev libpcre3-dev libssl-dev python3-dev build-essential mercurial wget pkg-config";
         (make &>$TMP_PATH/$filename&&info "make openresty project success.")||{ fail "make openresty project fail.";cat $TMP_PATH/$filename;results 1;};
         lngs="--with-luajit --with-http_stub_status_module --with-http_realip_module --with-pcre --with-pcre-jit --with-file-aio --with-threads";
         rm openresty*.tar.gz&&cd $location/openresty/openresty-*.*.*&&echo "./configure -j2 --prefix=/usr/local/openresty $lngs "|"/bin/bash";
@@ -45,65 +49,49 @@ if [[ -f /humlib/extra.sh ]];then
         (make install &>$TMP_PATH/$filename&&info "install openresty success.")||{ fail "install openresty fail.";cat $TMP_PATH/$filename;results 1;};
         cd $location;
 
-        install_apt_package certbot;
-        install_apt_package goaccess;
-        install_apt_package less;
-        install_apt_package libpam-google-authenticator;
-        install_apt_package ncat;
-        install_apt_package net-tools;
+        install_apt_package nano;
         install_apt_package nodejs;
         install_apt_package openssl;
-        install_apt_package python3-certbot-nginx;
-        install_apt_package python3-pip;
-        install_apt_package python3-pycurl;
         install_apt_package redis;
-        install_apt_package screen;
         install_apt_package siege;
-        install_apt_package stunnel4;
         install_apt_package sqlite3;
-        install_apt_package ssh;
         install_apt_package sudo;
         install_apt_package supervisor;
-        install_apt_package vim;
+        install_apt_package tzdata;
 
         install_npm_package configurable-http-proxy;
-        install_npm_package terser;
-        install_npm_package svgo;
+        install_npm_package ijavascript;
 
         install_pip3_package aiohttp;
         install_pip3_package asyncio;
-        install_pip3_package argparse;
-        install_pip3_package emu86;
-        install_pip3_package jupyter;
+        install_pip3_package dash;
+        install_pip3_package ilua;
         install_pip3_package jupyterhub;
         install_pip3_package jupyterlab;
         install_pip3_package nest_asyncio;
-        install_pip3_package mitmproxy;
-        install_pip3_package peewee;
-        install_pip3_package rich;
+
+        install_pip3_package jupyter-dash;
 
         update_package_repo&&purge_apt_all_package "build-essential mercurial";
+        rm -rf /etc/apt/sources.list.d/nodesource.list* &>/dev/null;
         rm -rf /usr/include/unix;ln -snf $LIB_PATH /usr/include/unix;
         rm -rf /log /var/log&&ln -snf $LOG_PATH /log;ln -snf $LOG_PATH /var/log;
+        ln -snf /usr/local/openresty/luajit/bin/luajit /usr/local/sbin/lua;
         ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &>/dev/null;
         dpkg-reconfigure -f noninteractive tzdata;
 
         install_exec_file_or_dir nginx   /usr/local/openresty/nginx/sbin/ /usr/local/sbin/                     920 openresty;
         install_exec_file_or_dir resty   /usr/local/openresty/bin/        /usr/local/sbin/                     920 resty;
         install_exec_file_or_dir opm     /usr/local/openresty/bin/        /usr/local/sbin/                     920 opm;
-        install_exec_file_or_dir cmaps   /humsys/hub.d/                   /usr/local/share/jupyter/lab/static/ 920 cmaps;
 
         configs $LIB_PATH/config.d/auth;
         configs $LIB_PATH/config.d/bashrc;
-        configs $LIB_PATH/config.d/frps;
-        configs $LIB_PATH/config.d/gem;
         configs $LIB_PATH/config.d/git;
         configs $LIB_PATH/config.d/hub;
         configs $LIB_PATH/config.d/nginx;
         configs $LIB_PATH/config.d/npm;
         configs $LIB_PATH/config.d/pip;
         configs $LIB_PATH/config.d/redis;
-        configs $LIB_PATH/config.d/stunnel;
         configs $LIB_PATH/config.d/su;
         configs $LIB_PATH/config.d/supervisord;
     fi
@@ -120,15 +108,13 @@ if [[ -f /humlib/extra.sh ]];then
         echo -e "\t-S,\t--store    STORE    \tSTORE for ext App. Default value is null\n";
         echo -e "\t-K,\t--keyfile  PATH     \tPath to supplied SSL key file. Default value is privkey.pem.\n";
         echo -e "\t-C,\t--certfile PATH     \tPath to supplied SSL certificate pem file. Default value is fullchain.pem.\n";
-        echo -e "\t-D,\t--domain   DOMAIN   \tDomain for Web App. Default value is goofts.com\n";
-        echo -e "\t-E,\t--email    EMAIL    \tEmail for Domain Owner. Default value is goofts@zl.com\n";
         echo -e "\nInstall Parameters:\n";
         echo -e "\t-i,\t--install  SERVER   \tInstall multiple server for installation.\n\t\tOnly support these:\n\t\t\t"${VALID_DB[@]}"\n";
         echo -e "\t-l,\t--language LANGUAGE \tInstall multiple language for deployment.\n\t\tOnly support these:\n\t\t\t"${VALID_LANGUAGE[@]}"\n";
         echo -e "\t-d,\t--database DB       \tInstall multiple database for deployment.\n\t\tOnly support these:\n\t\t\t"${VALID_SERVER[@]}"\n";
     }
 
-    ARGS=$(getopt -o hSK:C:D:E:i:l:d: -l "help,store,keyfile:,certfile:,domain:,email:,install:,language:,database:" -n "$0" -- "$@");
+    ARGS=$(getopt -o hSK:C:i:l:d: -l "help,store,keyfile:,certfile:,install:,language:,database:" -n "$0" -- "$@");
     eval set -- "$ARGS";
 
     while true; do
@@ -147,14 +133,6 @@ if [[ -f /humlib/extra.sh ]];then
                 ;;
             -C|--certfile)
                 CERTFILE=$2;
-                shift 2;
-                ;;
-            -D|--domain)
-                DOMAIN=$2;
-                shift 2;
-                ;;
-            -E|--email)
-                EMAIL=$2;
                 shift 2;
                 ;;
             -i|--install)
@@ -207,8 +185,6 @@ if [[ -f /humlib/extra.sh ]];then
     [[ ! -z $STORE ]]||STORE="local";
     [[ ! -z $KEYFILE ]]||KEYFILE="/humsys/hub.d/privkey.pem";
     [[ ! -z $CERTFILE ]]||CERTFILE="/humsys/hub.d/fullchain.pem";
-    [[ ! -z $DOMAIN ]]||DOMAIN="*.goofts.com";
-    [[ ! -z $EMAIL ]]||EMAIL="goofts@zl.com";
 
     if [[ $AVAILABLE_RAM -lt 2000 ]];then
         fail "Yamami is likely to fail to install without 1GB or more of RAM.";

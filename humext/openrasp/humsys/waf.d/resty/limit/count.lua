@@ -1,6 +1,3 @@
--- implement GitHub request rate limiting:
---    https://developer.github.com/v3/#rate-limiting
-
 local ngx_shared = ngx.shared
 local setmetatable = setmetatable
 local assert = assert

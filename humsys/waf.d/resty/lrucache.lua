@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 local ffi = require "ffi"
 local ffi_new = ffi.new
 local ffi_sizeof = ffi.sizeof

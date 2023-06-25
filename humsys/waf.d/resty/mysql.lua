@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 local bit = require "bit"
 local resty_sha256 = require "resty.sha256"
 local sub = string.sub

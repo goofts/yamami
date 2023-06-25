@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 local sub = string.sub
 local byte = string.byte
 local tab_insert = table.insert

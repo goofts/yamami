@@ -1,6 +1,3 @@
--- Copyright (C) by Yichun Zhang (agentzh)
-
-
 local ffi = require "ffi"
 
 

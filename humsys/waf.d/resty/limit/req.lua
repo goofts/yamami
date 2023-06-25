@@ -1,9 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
---
--- This library is an approximate Lua port of the standard ngx_limit_req
--- module.
-
-
 local ffi = require "ffi"
 local math = require "math"
 

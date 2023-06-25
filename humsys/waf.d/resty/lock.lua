@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 require "resty.core.shdict"  -- enforce this to avoid dead locks
 
 local ffi = require "ffi"

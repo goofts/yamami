@@ -1,0 +1,12 @@
+{
+    "display_name": "Lua",
+    "argv": [
+        "python",
+        "-m",
+        "ilua.app",
+        "-c",
+        "{connection_file}"
+    ],
+    "language": "lua",
+    "interrupt_mode": "message"
+}

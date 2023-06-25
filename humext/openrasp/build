@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Yamami Main Compiling Script.
+#
+# Usage: build.sh [-h|--help] [parameters ...]
+#
+# We want the provision script loads all env configure first
+VALID_DOCKERFILE=("base4arm" "es4arm" "rasp4arm");
+
+function usage(){
+    echo -e "\nYamami main compiling script.\n";
+    echo -e "\nUsage: %s [[-h|--help]|[parameters ...] [[optional ...]|[install ...]]]\n" "${0}";
+    echo -e "\t-h,\t--help\tShows this help message and exit.\n";
+    echo -e "\nParameters:\n";
+    echo -e "\t-d,\t--dockerfile FILE \tCompile multiple dockerfile for deployment.\n\t\tOnly support these:\n\t\t\t"${VALID_DOCKERFILE[@]}"\n";
+}
+
+ARGS=$(getopt -o hd: -l "help,dockerfile:" -n "$0" -- "$@");
+eval set -- "$ARGS";
+
+while true; do
+    case "$1" in
+        -h|--help)
+            usage;
+            exit 0;
+            ;;
+        -d|--dockerfile)
+            GIVEN_ARG=$2;
+            if [[ "${VALID_DOCKERFILE[@]}" =~ "${GIVEN_ARG}" ]];then
+                DOCKERFILE=$2;
+                shift 2;
+            else
+                usage;
+                exit 1;
+            fi
+            ;;
+        --)
+            shift;
+            break;
+            ;;
+        *)
+            usage;
+            exit 1;
+            ;;
+    esac
+done
+
+[[ ! -z $DOCKERFILE ]]||exit 0;
+
+if [[ "dockerfile" == $DOCKERFILE ]];then
+    echo "docker build -t goofts/yamami:latest -f $DOCKERFILE . "|"/bin/bash";
+    exit 0;
+else
+    echo "docker build -t goofts/yamami:$DOCKERFILE -f $DOCKERFILE . "|"/bin/bash";
+    exit 0;
+fi

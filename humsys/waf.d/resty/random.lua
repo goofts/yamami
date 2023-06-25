@@ -1,6 +1,3 @@
--- Copyright (C) by Yichun Zhang (agentzh)
-
-
 local ffi = require "ffi"
 local ffi_new = ffi.new
 local ffi_str = ffi.string
@@ -33,4 +30,3 @@ end
 
 
 return _M
-

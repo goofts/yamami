@@ -1,5 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
 local subsystem = ngx.config.subsystem
 
 

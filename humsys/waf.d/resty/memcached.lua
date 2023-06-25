@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh), CloudFlare Inc.
-
-
 local escape_uri = ngx.escape_uri
 local unescape_uri = ngx.unescape_uri
 local match = string.match

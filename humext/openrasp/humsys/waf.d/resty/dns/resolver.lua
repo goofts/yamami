@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 -- local socket = require "socket"
 local bit = require "bit"
 local udp = ngx.socket.udp

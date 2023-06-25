@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
--- Copyright (C) Shuxin Yang
-
 --[[
   This module implements a key/value cache store. We adopt LRU as our
 replace/evict policy. Each key/value pair is tagged with a Time-to-Live (TTL);

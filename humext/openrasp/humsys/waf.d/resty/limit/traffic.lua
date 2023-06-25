@@ -1,10 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
---
--- This is an aggregator for various concrete traffic limiter instances
--- (like instances of the resty.limit.req, resty.limit.count and
--- resty.limit.conn classes).
-
-
 local max = math.max
 
 

@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 local ffi = require "ffi"
 local debug = require "debug"
 local base = require "resty.core.base"

@@ -1,6 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
 local bit = require "bit"
 local ffi = require "ffi"
 

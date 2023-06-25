@@ -1,10 +1,3 @@
--- Copyright (C) Yichun Zhang (agentzh)
-
-
--- FIXME: this library is very rough and is currently just for testing
---        the websocket server.
-
-
 local wbproto = require "resty.websocket.protocol"
 local bit = require "bit"
 

@@ -1,6 +1,3 @@
--- Copyright (C) by Yichun Zhang (agentzh)
-
-
 require "resty.sha"
 local ffi = require "ffi"
 local ffi_new = ffi.new

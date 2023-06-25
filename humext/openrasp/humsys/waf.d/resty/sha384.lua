@@ -1,6 +1,3 @@
--- Copyright (C) by Yichun Zhang (agentzh)
-
-
 require "resty.sha512"
 local ffi = require "ffi"
 local ffi_new = ffi.new
@@ -57,4 +54,3 @@ function _M.reset(self)
 end
 
 return _M
-
